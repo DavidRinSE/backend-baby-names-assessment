@@ -38,16 +38,21 @@ Suggested milestones for incremental development:
  - Fix main() to use the extract_names list
 """
 
-
+import re
 def extract_names(filename):
-    """
-    Given a single file name for babyXXXX.html, returns a single list starting
-    with the year string followed by the name-rank strings in alphabetical order.
-    ['2006', 'Aaliyah 91', Aaron 57', 'Abagail 895', ' ...]
-    """
-    names = []
-    # +++your code here+++
-    return names
+    names = [filename[4:8]] # couldn't make the regex work here
+    nameDict = {}
+    with open(filename, 'r') as f:
+        matches = re.findall(r'<td>(\d+)</td><td>(\w+)</td><td>(\w+)</td>', '\n'.join(f))
+        matches = [{"rank": data[0], "boy": data[1], "girl": data[2]} for data in matches]
+        for data in matches:     
+            if data["boy"] not in nameDict: 
+                nameDict[data["boy"]] = data["rank"]
+            if data["girl"] not in nameDict: 
+                nameDict[data["girl"]] = data["rank"]
+    for name in nameDict.keys():
+        names.append(name + " " + str(nameDict[name]))
+    return sorted(names)
 
 
 def create_parser():
@@ -82,6 +87,15 @@ def main(args):
     # or to write the list to a summary file e.g. `baby1990.html.summary`
 
     # +++your code here+++
+    if create_summary:
+        for file in file_list:
+            names = '\n'.join(extract_names(file)) 
+            with open(file + '.summary', 'w+') as f:
+                f.write(names)
+    else:
+        for file in file_list:
+            names = '\n'.join(extract_names(file))
+            print(names)
 
 
 if __name__ == '__main__':
